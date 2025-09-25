@@ -1,8 +1,6 @@
 import random
 
-# Creating major lists and dicts to hold the deck data, possible spread, and possible drawn cards:
-spread = ["Passado", "Presente", "Futuro"]
-drawn_cards = []
+# Creating a major list of dicts to hold the deck data:
 deck = [
     # Major Arcana
     {"name": "The Fool", "meaning": "Beginnings, innocence, spontaneity, free spirit"},
@@ -27,7 +25,7 @@ deck = [
     {"name": "The Sun", "meaning": "Joy, success, vitality, optimism"},
     {"name": "Judgement", "meaning": "Rebirth, inner calling, absolution"},
     {"name": "The World", "meaning": "Completion, accomplishment, wholeness"},
-
+    
     # Minor Arcana - Wands
     {"name": "Ace of Wands", "meaning": "Inspiration, new opportunities, growth, potential"},
     {"name": "Two of Wands", "meaning": "Planning, decisions, progress"},
@@ -93,7 +91,7 @@ deck = [
     {"name": "King of Pentacles", "meaning": "Abundance, security, leadership, prosperity"},
 ]
 
-# Creating a function to shuffle the deck of cards:
+# Function to shuffle the deck of cards:
 def shuffle_deck(deck):
     """
     Return a new shuffled copy of `deck`.
@@ -105,26 +103,48 @@ def shuffle_deck(deck):
 
 shuffled_deck = shuffle_deck(deck)
 
-
 # DEBUG STATEMENT
 # print("DEBUG: first 5 cards after shuffle ->", [c["name"] for c in shuffled_deck[:5]])
 
-
-# Defining a function to draw a card from the shuffled deck, and assingning a random orientation to the card:
+# Function to draw a card from the shuffled deck and assign a random orientation:
 def draw_card_with_orientation(shuffled_deck):
     """
     Remove a card from shuffled_deck and assign a random orientation.
     Returns a dictionary: {"card": card_dict, "reversed": True/False}
     """
-    card = shuffled_deck.pop()  # Assigning a variable to hold the last card from the shuffled deck.
+    if not shuffled_deck:
+        raise ValueError("No more cards left in the deck to draw.")
+    
+    card = shuffled_deck.pop()  # Remove the last card from the deck
     reversed_flag = random.choice([False, True])  # True = reversed, False = upright
     return {"card": card, "reversed": reversed_flag}
 
-drawn = draw_card_with_orientation(shuffled_deck)
+# Example single draw
+drawn_card = draw_card_with_orientation(shuffled_deck)
+
+# DEBUG STATEMENT
+# print("DEBUG: Drawn card ->", drawn_card["card"]["name"], "| Reversed?", drawn_card["reversed"])
+
+# Function to create a 3-card spread:
+def draw_spread(shuffled_deck):
+    """
+    Draws a 3-card spread: Past, Present, Future.
+    Returns a list of dictionaries with card info and orientation.
+    """
+    spread_result = []
+    positions = ["Past", "Present", "Future"]
+
+    for position in positions:
+        card_info = draw_card_with_orientation(shuffled_deck)
+        card_info["position"] = position  # add the position in the spread
+        spread_result.append(card_info)
+
+    return spread_result
 
 
 # DEBUG STATEMENT
-# print("DEBUG: Drawn card ->", drawn["card"]["name"], "| Reversed?", drawn["reversed"])
-
+# spread_debug = draw_spread(shuffled_deck)
+# for card_info in spread_debug:
+#    print(f"DEBUG: {card_info['position']} -> {card_info['card']['name']} | Reversed? {card_info['reversed']}")
 
 
