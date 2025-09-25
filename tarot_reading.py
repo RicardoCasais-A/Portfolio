@@ -162,14 +162,14 @@ def user_interaction():
 
     print("\n--- Tarot Reading ---")
     print("\nNote on card orientations:")
-    print("- Upright  → Positive, direct, manifesting naturally.")
-    print("- Reversed → Blocked, opposite, or internalized.\n")
+    print("Upright interpretation: → Positive, direct, manifesting naturally.")
+    print("Reversed interpretation: → Blocked, opposite, or internalized.\n")
 
     while True:
         print("1: Draw a single card")
         print("2: Draw a 3-card spread")
         print("3: Quit")
-        choice = input("Choose an option (1-3): ")
+        choice = input("Choose an option (1-3): ").strip().lower()
 
         if choice == "3":
             print("\nGoodbye! May the cards guide you.\n")
@@ -183,7 +183,7 @@ def user_interaction():
         while True:
             if choice == "1":
                 if not shuffled_deck:
-                    reshuffle = input("Deck empty. Reshuffle? (y/n): ").lower()
+                    reshuffle = input("Deck empty. Reshuffle? (y/n): ").strip().lower()
                     if reshuffle == "y":
                         shuffled_deck = shuffle_deck(deck)
                     else:
@@ -197,7 +197,7 @@ def user_interaction():
 
             elif choice == "2":
                 if len(shuffled_deck) < 3:
-                    reshuffle = input("Not enough cards. Reshuffle deck? (y/n): ").lower()
+                    reshuffle = input("Not enough cards. Reshuffle deck? (y/n): ").strip().lower()
                     if reshuffle == "y":
                         shuffled_deck = shuffle_deck(deck)
                     else:
@@ -216,7 +216,7 @@ def user_interaction():
             while True:
                 next_step = input(
                     "Do you want to draw again (same type), switch type, or quit? (again/switch/quit): "
-                ).lower()
+                ).strip().lower()
                 if next_step == "again":
                     break  # redraw with same choice
                 elif next_step == "switch":
