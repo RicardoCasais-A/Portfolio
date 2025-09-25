@@ -104,5 +104,27 @@ def shuffle_deck(deck):
     return shuffled
 
 shuffled_deck = shuffle_deck(deck)
+
+
 # DEBUG STATEMENT
-print("DEBUG: first 5 cards after shuffle ->", [c["name"] for c in shuffled_deck[:5]])
+# print("DEBUG: first 5 cards after shuffle ->", [c["name"] for c in shuffled_deck[:5]])
+
+
+# Defining a function to draw a card from the shuffled deck, and assingning a random orientation to the card:
+def draw_card_with_orientation(shuffled_deck):
+    """
+    Remove a card from shuffled_deck and assign a random orientation.
+    Returns a dictionary: {"card": card_dict, "reversed": True/False}
+    """
+    card = shuffled_deck.pop()  # Assigning a variable to hold the last card from the shuffled deck.
+    reversed_flag = random.choice([False, True])  # True = reversed, False = upright
+    return {"card": card, "reversed": reversed_flag}
+
+drawn = draw_card_with_orientation(shuffled_deck)
+
+
+# DEBUG STATEMENT
+# print("DEBUG: Drawn card ->", drawn["card"]["name"], "| Reversed?", drawn["reversed"])
+
+
+
