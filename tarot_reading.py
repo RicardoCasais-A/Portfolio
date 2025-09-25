@@ -91,6 +91,11 @@ deck = [
     {"name": "King of Pentacles", "meaning": "Abundance, security, leadership, prosperity"},
 ]
 
+# Ensuring every card meaning string has punctuation:
+for card in deck:
+    if not card["meaning"].endswith("."):
+        card["meaning"] += "."
+
 # Function to shuffle the deck of cards:
 def shuffle_deck(deck):
     """
@@ -101,9 +106,9 @@ def shuffle_deck(deck):
     random.shuffle(shuffled)
     return shuffled
 
-shuffled_deck = shuffle_deck(deck)
 
 # DEBUG STATEMENT - shuffle_deck function:
+# shuffled_deck = shuffle_deck(deck)
 # print("DEBUG: first 5 cards after shuffle ->", [c["name"] for c in shuffled_deck[:5]])
 
 # Function to draw a card from the shuffled deck and assign a random orientation:
@@ -119,8 +124,6 @@ def draw_card_with_orientation(shuffled_deck):
     reversed_flag = random.choice([False, True])  # True = reversed, False = upright
     return {"card": card, "reversed": reversed_flag}
 
-# Example single draw
-drawn_card = draw_card_with_orientation(shuffled_deck)
 
 # DEBUG STATEMENT - draw_card_with_orientation function:
 # print("DEBUG: Drawn card ->", drawn_card["card"]["name"], "| Reversed?", drawn_card["reversed"])
@@ -157,42 +160,75 @@ def user_interaction():
     # Shuffle the deck at the start
     shuffled_deck = shuffle_deck(deck)
 
+    print("\n--- Tarot Reading ---")
+    print("\nNote on card orientations:")
+    print("- Upright  → Positive, direct, manifesting naturally.")
+    print("- Reversed → Blocked, opposite, or internalized.\n")
+
     while True:
-        print("\n--- Tarot Reading ---")
         print("1: Draw a single card")
         print("2: Draw a 3-card spread")
         print("3: Quit")
         choice = input("Choose an option (1-3): ")
 
-        if choice == "1":
-            if not shuffled_deck:
-                print("The deck is empty. Reshuffling...")
-                shuffled_deck = shuffle_deck(deck)
-            drawn = draw_card_with_orientation(shuffled_deck)
-            card = drawn["card"]
-            reversed_flag = drawn["reversed"]
-            print(f"\nYou drew: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
-            print("Meaning:", card["meaning"])
+        if choice == "3":
+            print("\nGoodbye! May the cards guide you.\n")
+            return
 
-        elif choice == "2":
-            if len(shuffled_deck) < 3:
-                print("Not enough cards. Reshuffling deck...")
-                shuffled_deck = shuffle_deck(deck)
-            spread = draw_spread(shuffled_deck)
-            print("\nYour 3-card spread:")
-            for card_info in spread:
-                card = card_info["card"]
-                position = card_info["position"]
-                reversed_flag = card_info["reversed"]
-                print(f"{position}: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
-                print("Meaning:", card["meaning"], "\n")
+        elif choice not in ("1", "2"):
+            print("Invalid option, please choose 1, 2, or 3.\n")
+            continue
 
-        elif choice == "3":
-            print("Goodbye! May the cards guide you.")
-            break
+        # Drawing loop for the selected option
+        while True:
+            if choice == "1":
+                if not shuffled_deck:
+                    reshuffle = input("Deck empty. Reshuffle? (y/n): ").lower()
+                    if reshuffle == "y":
+                        shuffled_deck = shuffle_deck(deck)
+                    else:
+                        print("Exiting program.")
+                        return
+                drawn = draw_card_with_orientation(shuffled_deck)
+                card = drawn["card"]
+                reversed_flag = drawn["reversed"]
+                print(f"\nYou drew: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
+                print("Meaning:", card["meaning"])
 
-        else:
-            print("Invalid option, please choose 1, 2, or 3.")
+            elif choice == "2":
+                if len(shuffled_deck) < 3:
+                    reshuffle = input("Not enough cards. Reshuffle deck? (y/n): ").lower()
+                    if reshuffle == "y":
+                        shuffled_deck = shuffle_deck(deck)
+                    else:
+                        print("Cannot draw a 3-card spread. Exiting.")
+                        return
+                spread = draw_spread(shuffled_deck)
+                print("\nYour 3-card spread:")
+                for card_info in spread:
+                    card = card_info["card"]
+                    position = card_info["position"]
+                    reversed_flag = card_info["reversed"]
+                    print(f"{position}: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
+                    print("Meaning:", card["meaning"], "\n")
+
+            # Ask user what to do next
+            while True:
+                next_step = input(
+                    "Do you want to draw again (same type), switch type, or quit? (again/switch/quit): "
+                ).lower()
+                if next_step == "again":
+                    break  # redraw with same choice
+                elif next_step == "switch":
+                    break  # go back to main menu to pick 1 or 2
+                elif next_step == "quit":
+                    print("\nGoodbye! May the cards guide you.\n")
+                    return
+                else:
+                    print("Invalid input, please enter 'again', 'switch', or 'quit'.")
+
+            if next_step == "switch":
+                break  # break inner loop to show main menu again
 
 
 
