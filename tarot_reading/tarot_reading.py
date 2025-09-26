@@ -1,5 +1,137 @@
 import random
 
+# Defining a TarotDeck class to encapsulate deck operations:
+class TarotDeck:
+    def __init__(self, deck):
+        self.deck = deck
+        self.normalize_meanings()
+        self.shuffled_deck = self.shuffle()
+
+    def normalize_meanings(self):
+        """Ensure every card's meaning ends with a period."""
+        for card in self.deck:
+            if not card["meaning"].endswith("."):
+                card["meaning"] += "."
+
+    def shuffle(self):
+        """Return a new shuffled copy of the deck."""
+        shuffled = self.deck.copy()
+        random.shuffle(shuffled)
+        return shuffled
+
+    def draw_card(self):
+        """Draw a single card from the shuffled deck with a random orientation."""
+        if not self.shuffled_deck:
+            raise ValueError("No more cards left to draw.")
+        card = self.shuffled_deck.pop()
+        reversed_flag = random.choice([False, True])  # True = reversed, False = upright
+        return {"card": card, "reversed": reversed_flag}
+
+    def draw_spread(self, positions=["Past", "Present", "Future"]):
+        """Draw multiple cards for a spread and assign positions."""
+        spread = []
+        for pos in positions:
+            card_info = self.draw_card()
+            card_info["position"] = pos
+            spread.append(card_info)
+        return spread
+    
+    def format_card_info(self, card_info, include_position=True):
+        """Return a string describing a card with orientation and meaning."""
+        card = card_info["card"]
+        orientation = "Reversed" if card_info["reversed"] else "Upright"
+        lines = []
+        if include_position and "position" in card_info:
+            lines.append(f"{card_info['position']}: {card['name']} ({orientation})")
+        else:
+            lines.append(f"You drew: {card['name']} ({orientation})")
+        lines.append(f"Meaning: {card['meaning']}")
+        return "\n".join(lines)
+
+    def print_card(self, drawn):
+        """Print a single drawn card."""
+        print("\n" + self.format_card_info(drawn, include_position=False))
+
+    def print_spread(self, spread):
+        """Print multiple cards in a spread."""
+        print("\nYour spread:")
+        for info in spread:
+            print(self.format_card_info(info), "\n")
+
+# Defining the main application class to handle user interaction:
+class TarotApp:
+    def __init__(self, deck):
+        """Initialize the app with a TarotDeck instance."""
+        self.deck = TarotDeck(deck)
+        self.choice_map = {"1": "single", "2": "spread"}
+
+    def main_menu(self):
+        """Show the main menu and return user choice as '1', '2', or '3'."""
+        print("\n--- Tarot Reading ---")
+        print("\nNote on card orientations:")
+        print("Upright interpretation: → Positive, direct, manifesting naturally.")
+        print("Reversed interpretation: → Blocked, opposite, or internalized.\n")
+        print("1: Draw a single card")
+        print("2: Draw a 3-card spread")
+        print("3: Quit")
+        choice = input("Choose an option (1-3): ").strip().lower()
+        return choice
+
+    def ask_next_step(self):
+        """Ask user if they want to draw again, switch type, or quit."""
+        valid = {"again", "switch", "quit"}
+        while True:
+            choice = input(
+                "Do you want to draw again (same type), switch type, or quit? (again/switch/quit): "
+            ).strip().lower()
+            if choice in valid:
+                return choice
+            print("Invalid input, please enter 'again', 'switch', or 'quit'.")
+
+    def draw_and_print(self, draw_type):
+        """Handles drawing and printing cards based on draw_type."""
+        try:
+            if draw_type == 'single':
+                drawn = self.deck.draw_card()
+                self.deck.print_card(drawn)
+            elif draw_type == 'spread':
+                spread = self.deck.draw_spread()
+                self.deck.print_spread(spread)
+            return True
+        except ValueError:
+            prompt = "Deck empty. Reshuffle? (y/n): " if draw_type == 'single' else "Not enough cards. Reshuffle deck? (y/n): "
+            if input(prompt).strip().lower() == "y":
+                self.deck.shuffled_deck = self.deck.shuffle()
+                return self.draw_and_print(draw_type)
+            return False
+
+    def run(self):
+        """Run the main application loop."""
+        while True:
+            choice = self.main_menu()
+            if choice == "3":
+                print("\nGoodbye! May the cards guide you.\n")
+                return
+
+            draw_type = self.choice_map.get(choice)
+            if not draw_type:
+                print("Invalid option, please choose 1, 2, or 3.\n")
+                continue
+
+            while True:
+                if not self.draw_and_print(draw_type):
+                    msg = "Exiting program." if draw_type == "single" else "Cannot draw a 3-card spread. Exiting."
+                    print(msg)
+                    return
+
+                next_step = self.ask_next_step()
+                if next_step == "quit":
+                    print("\nGoodbye! May the cards guide you.\n")
+                    return
+                elif next_step == "switch":
+                    break  # Return to main menu to choose a new option
+
+
 # Creating a major list of dicts to hold the deck data:
 deck = [
     # Major Arcana
@@ -91,167 +223,10 @@ deck = [
     {"name": "King of Pentacles", "meaning": "Abundance, security, leadership, prosperity"},
 ]
 
-# Ensuring every card meaning string has punctuation:
-def normalize_meanings(deck):
-    for card in deck:
-        if not card["meaning"].endswith("."):
-            card["meaning"] += "."
-normalize_meanings(deck)
 
-
-# Function to shuffle the deck of cards:
-def shuffle_deck(deck):
-    """
-    Return a new shuffled copy of `deck`.
-    Does not modify the original list passed in.
-    """
-    shuffled = deck.copy()
-    random.shuffle(shuffled)
-    return shuffled
-
-
-# Function to draw a card from the shuffled deck and assign a random orientation:
-def draw_card_with_orientation(shuffled_deck):
-    """
-    Remove a card from shuffled_deck and assign a random orientation.
-    Returns a dictionary: {"card": card_dict, "reversed": True/False}
-    """
-    if not shuffled_deck:
-        raise ValueError("No more cards left in the deck to draw.")
-    
-    card = shuffled_deck.pop()  # Remove the last card from the deck
-    reversed_flag = random.choice([False, True])  # True = reversed, False = upright
-    return {"card": card, "reversed": reversed_flag}
-
-
-# Function to create a 3-card spread:
-def draw_spread(shuffled_deck):
-    """
-    Draws a 3-card spread: Past, Present, Future.
-    Returns a list of dictionaries with card info and orientation.
-    """
-    spread_result = []
-    positions = ["Past", "Present", "Future"]
-
-    for position in positions:
-        card_info = draw_card_with_orientation(shuffled_deck)
-        card_info["position"] = position  # add the position in the spread
-        spread_result.append(card_info)
-
-    return spread_result
-
-
-# Defining a function for the main menu print statements and inputs:
-def main_menu():
-    """
-    Show the main menu and return user choice as '1', '2', or '3'.
-    """
-    print("\n--- Tarot Reading ---")
-    print("\nNote on card orientations:")
-    print("Upright interpretation: → Positive, direct, manifesting naturally.")
-    print("Reversed interpretation: → Blocked, opposite, or internalized.\n")
-    print("1: Draw a single card")
-    print("2: Draw a 3-card spread")
-    print("3: Quit")
-    choice = input("Choose an option (1-3): ").strip().lower()
-    return choice
-
-
-# Defining a function for a single drawn card:
-def print_single_card(drawn):
-    """
-    Print the result of a single card draw.
-    """
-    card = drawn["card"]
-    reversed_flag = drawn["reversed"]
-    orientation = "Reversed" if reversed_flag else "Upright"
-    print(f"\nYou drew: {card['name']} ({orientation})")
-    print("Meaning:", card["meaning"])
-
-
-# Defining a function to print the 3-card spread:
-def print_spread(spread):
-    """
-    Print a 3-card spread with positions and orientations.
-    """
-    print("\nYour 3-card spread:")
-    for card_info in spread:
-        card = card_info["card"]
-        position = card_info["position"]
-        reversed_flag = card_info["reversed"]
-        orientation = "Reversed" if reversed_flag else "Upright"
-        print(f"{position}: {card['name']} ({orientation})")
-        print("Meaning:", card["meaning"], "\n")
-
-
-# Function for user interaction:
-def user_interaction():
-    # Shuffle the deck at the start
-    shuffled_deck = shuffle_deck(deck)
-    choice = main_menu()
-
-    while True:
-        print("1: Draw a single card")
-        print("2: Draw a 3-card spread")
-        print("3: Quit")
-        choice = input("Choose an option (1-3): ").strip().lower()
-
-        if choice == "3":
-            print("\nGoodbye! May the cards guide you.\n")
-            return
-
-        elif choice not in ("1", "2"):
-            print("Invalid option, please choose 1, 2, or 3.\n")
-            continue
-
-        # Drawing loop for the selected option
-        while True:
-            if choice == "1":
-                if not shuffled_deck:
-                    reshuffle = input("Deck empty. Reshuffle? (y/n): ").strip().lower()
-                    if reshuffle == "y":
-                        shuffled_deck = shuffle_deck(deck)
-                    else:
-                        print("Exiting program.")
-                        return
-                drawn = draw_card_with_orientation(shuffled_deck)
-                print_single_card(drawn)
-
-
-            elif choice == "2":
-                if len(shuffled_deck) < 3:
-                    reshuffle = input("Not enough cards. Reshuffle deck? (y/n): ").strip().lower()
-                    if reshuffle == "y":
-                        shuffled_deck = shuffle_deck(deck)
-                    else:
-                        print("Cannot draw a 3-card spread. Exiting.")
-                        return
-                spread = draw_spread(shuffled_deck)
-                print_spread(spread)
-
-
-            # Ask user what to do next
-            while True:
-                next_step = input(
-                    "Do you want to draw again (same type), switch type, or quit? (again/switch/quit): "
-                ).strip().lower()
-                if next_step == "again":
-                    break  # redraw with same choice
-                elif next_step == "switch":
-                    break  # go back to main menu to pick 1 or 2
-                elif next_step == "quit":
-                    print("\nGoodbye! May the cards guide you.\n")
-                    return
-                else:
-                    print("Invalid input, please enter 'again', 'switch', or 'quit'.")
-
-            if next_step == "switch":
-                break  # break inner loop to show main menu again
-
-
-
-# Run the program
+# Running the application:
 if __name__ == "__main__":
-    user_interaction()
+    app = TarotApp(deck)
+    app.run()
 
 
