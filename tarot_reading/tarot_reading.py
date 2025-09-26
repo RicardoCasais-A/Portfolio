@@ -92,9 +92,12 @@ deck = [
 ]
 
 # Ensuring every card meaning string has punctuation:
-for card in deck:
-    if not card["meaning"].endswith("."):
-        card["meaning"] += "."
+def normalize_meanings(deck):
+    for card in deck:
+        if not card["meaning"].endswith("."):
+            card["meaning"] += "."
+normalize_meanings(deck)
+
 
 # Function to shuffle the deck of cards:
 def shuffle_deck(deck):
@@ -138,15 +141,54 @@ def draw_spread(shuffled_deck):
     return spread_result
 
 
-# Function for user interaction:
-def user_interaction():
-    # Shuffle the deck at the start
-    shuffled_deck = shuffle_deck(deck)
-
+# Defining a function for the main menu print statements and inputs:
+def main_menu():
+    """
+    Show the main menu and return user choice as '1', '2', or '3'.
+    """
     print("\n--- Tarot Reading ---")
     print("\nNote on card orientations:")
     print("Upright interpretation: → Positive, direct, manifesting naturally.")
     print("Reversed interpretation: → Blocked, opposite, or internalized.\n")
+    print("1: Draw a single card")
+    print("2: Draw a 3-card spread")
+    print("3: Quit")
+    choice = input("Choose an option (1-3): ").strip().lower()
+    return choice
+
+
+# Defining a function for a single drawn card:
+def print_single_card(drawn):
+    """
+    Print the result of a single card draw.
+    """
+    card = drawn["card"]
+    reversed_flag = drawn["reversed"]
+    orientation = "Reversed" if reversed_flag else "Upright"
+    print(f"\nYou drew: {card['name']} ({orientation})")
+    print("Meaning:", card["meaning"])
+
+
+# Defining a function to print the 3-card spread:
+def print_spread(spread):
+    """
+    Print a 3-card spread with positions and orientations.
+    """
+    print("\nYour 3-card spread:")
+    for card_info in spread:
+        card = card_info["card"]
+        position = card_info["position"]
+        reversed_flag = card_info["reversed"]
+        orientation = "Reversed" if reversed_flag else "Upright"
+        print(f"{position}: {card['name']} ({orientation})")
+        print("Meaning:", card["meaning"], "\n")
+
+
+# Function for user interaction:
+def user_interaction():
+    # Shuffle the deck at the start
+    shuffled_deck = shuffle_deck(deck)
+    choice = main_menu()
 
     while True:
         print("1: Draw a single card")
@@ -173,10 +215,8 @@ def user_interaction():
                         print("Exiting program.")
                         return
                 drawn = draw_card_with_orientation(shuffled_deck)
-                card = drawn["card"]
-                reversed_flag = drawn["reversed"]
-                print(f"\nYou drew: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
-                print("Meaning:", card["meaning"])
+                print_single_card(drawn)
+
 
             elif choice == "2":
                 if len(shuffled_deck) < 3:
@@ -187,13 +227,8 @@ def user_interaction():
                         print("Cannot draw a 3-card spread. Exiting.")
                         return
                 spread = draw_spread(shuffled_deck)
-                print("\nYour 3-card spread:")
-                for card_info in spread:
-                    card = card_info["card"]
-                    position = card_info["position"]
-                    reversed_flag = card_info["reversed"]
-                    print(f"{position}: {card['name']} ({'Reversed' if reversed_flag else 'Upright'})")
-                    print("Meaning:", card["meaning"], "\n")
+                print_spread(spread)
+
 
             # Ask user what to do next
             while True:
