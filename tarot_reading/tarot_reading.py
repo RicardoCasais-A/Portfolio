@@ -107,10 +107,6 @@ def shuffle_deck(deck):
     return shuffled
 
 
-# DEBUG STATEMENT - shuffle_deck function:
-# shuffled_deck = shuffle_deck(deck)
-# print("DEBUG: first 5 cards after shuffle ->", [c["name"] for c in shuffled_deck[:5]])
-
 # Function to draw a card from the shuffled deck and assign a random orientation:
 def draw_card_with_orientation(shuffled_deck):
     """
@@ -124,9 +120,6 @@ def draw_card_with_orientation(shuffled_deck):
     reversed_flag = random.choice([False, True])  # True = reversed, False = upright
     return {"card": card, "reversed": reversed_flag}
 
-
-# DEBUG STATEMENT - draw_card_with_orientation function:
-# print("DEBUG: Drawn card ->", drawn_card["card"]["name"], "| Reversed?", drawn_card["reversed"])
 
 # Function to create a 3-card spread:
 def draw_spread(shuffled_deck):
@@ -143,16 +136,6 @@ def draw_spread(shuffled_deck):
         spread_result.append(card_info)
 
     return spread_result
-
-
-# DEBUG STATEMENT - draw_spread function:
-# spread_debug = draw_spread(shuffled_deck)
-# for card_info in spread_debug:
-#    print(f"DEBUG: {card_info['position']} -> {card_info['card']['name']} | Reversed? {card_info['reversed']}")
-
-# DEBUG STATEMENT:
-#print(draw_card_with_orientation(shuffled_deck))
-#print(draw_spread(shuffled_deck))
 
 
 # Function for user interaction:
