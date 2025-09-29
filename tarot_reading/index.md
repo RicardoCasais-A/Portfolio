@@ -1,4 +1,5 @@
 ---
+layout: home
 title: Tarot Reading Project
 ---
 
